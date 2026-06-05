@@ -230,17 +230,20 @@
         const songSelect = document.getElementById("song-select");
         songSelect.innerHTML = "";
       
-        // 1. Ambil list ID urutan yang mau kita pakai untuk sesi ini
-        const targetOrder = sessionMapping[sessionNum] || [];
+        // 1. Ambil list ID dari sessionMapping dan paksa semuanya jadi string bersih tanpa spasi
+        const targetOrder = (sessionMapping[sessionNum] || []).map(id => String(id).trim());
       
         // 2. Filter lagu yang ID-nya terdaftar di sesi ini
         let filteredSongs = allSongsFromDB.filter((song) => {
-          return targetOrder.includes(String(song.id));
+          const cleanSongId = String(song.id).trim();
+          return targetOrder.includes(cleanSongId);
         });
       
-        // 3. SELEKSI PENYUSUNAN (SORTING) SESUAI URUTAN ID DI SESSIONMAPPING
+        // 3. Sorting dengan membandingkan posisi indeks string yang sudah bersih
         filteredSongs.sort((a, b) => {
-          return targetOrder.indexOf(String(a.id)) - targetOrder.indexOf(String(b.id));
+          const indexA = targetOrder.indexOf(String(a.id).trim());
+          const indexB = targetOrder.indexOf(String(b.id).trim());
+          return indexA - indexB;
         });
       
         if (filteredSongs.length === 0) {
@@ -260,6 +263,7 @@
           songSelect.appendChild(option);
         });
       
+        // Jalankan render untuk lagu pertama yang sudah terurut paling atas
         showSongDetails(filteredSongs[0].id);
       }
 
