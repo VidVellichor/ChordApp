@@ -229,33 +229,37 @@
       function filterSongsBySession(sessionNum) {
         const songSelect = document.getElementById("song-select");
         songSelect.innerHTML = "";
-
-        const filteredSongs = allSongsFromDB.filter((song) => {
-          // Memastikan kecocokan tipe data string ID
-          return (
-            sessionMapping[sessionNum] &&
-            sessionMapping[sessionNum].includes(String(song.id))
-          );
+      
+        // 1. Ambil list ID urutan yang mau kita pakai untuk sesi ini
+        const targetOrder = sessionMapping[sessionNum] || [];
+      
+        // 2. Filter lagu yang ID-nya terdaftar di sesi ini
+        let filteredSongs = allSongsFromDB.filter((song) => {
+          return targetOrder.includes(String(song.id));
         });
-
+      
+        // 3. SELEKSI PENYUSUNAN (SORTING) SESUAI URUTAN ID DI SESSIONMAPPING
+        filteredSongs.sort((a, b) => {
+          return targetOrder.indexOf(String(a.id)) - targetOrder.indexOf(String(b.id));
+        });
+      
         if (filteredSongs.length === 0) {
           const option = document.createElement("option");
           option.innerText = "-- Tidak ada lagu di sesi ini --";
           songSelect.appendChild(option);
           document.getElementById("song-title").innerText = "Kosong";
           document.getElementById("song-artist").innerText = "Penyanyi: -";
-          document.getElementById("chord-display").innerText =
-            "Belum ada lagu yang didaftarkan ke sesi ini.";
+          document.getElementById("chord-display").innerText = "Belum ada lagu yang didaftarkan ke sesi ini.";
           return;
         }
-
+      
         filteredSongs.forEach((song) => {
           const option = document.createElement("option");
           option.value = song.id;
           option.innerText = `${song.title} - ${song.artist}`;
           songSelect.appendChild(option);
         });
-
+      
         showSongDetails(filteredSongs[0].id);
       }
 
