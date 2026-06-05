@@ -216,13 +216,21 @@
 
       async function loadAllSongs() {
         try {
-          const response = await fetch("songs.json");
+          // Menggunakan window.location.origin biar jalurnya mutlak ke root domain Vercel lu
+          const urlDatabase = `${window.location.origin}/songs.json`;
+          console.log("Mencoba mengambil database dari:", urlDatabase);
+          
+          const response = await fetch(urlDatabase);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
           allSongsFromDB = await response.json();
           filterSongsBySession(currentSession);
         } catch (err) {
           console.error("Gagal load file songs.json:", err);
-          document.getElementById("chord-display").innerText =
-            "Gagal memuat file database JSON.";
+          document.getElementById("chord-display").innerText = "Gagal memuat file database JSON.";
         }
       }
 
