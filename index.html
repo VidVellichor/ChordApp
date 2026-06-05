@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Chord Auto-Convert</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        max-width: 950px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #1e1e24;
+        color: #fff;
+      }
+      .card {
+        background: #2a2a35;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        margin-top: 0;
+        color: #ff9800;
+        font-size: 28px;
+      }
+      p {
+        color: #ccc;
+        margin-bottom: 25px;
+      }
+
+      /* Style untuk Tab Sesi */
+      .session-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 6px;
+        border: none;
+        background: #3a3a4a;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .tab-btn.active {
+        background: #ff9800;
+        color: #1e1e24;
+      }
+
+      .controls {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+        align-items: flex-end;
+      }
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      label {
+        font-size: 14px;
+        color: #ff9800;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      select {
+        padding: 10px 15px;
+        font-size: 16px;
+        border-radius: 6px;
+        background: #3a3a4a;
+        color: #fff;
+        border: 1px solid #555;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      /* Style untuk Toggle Notasi Angka Only */
+      .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #3a3a4a;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #555;
+        cursor: pointer;
+        height: 42px;
+        box-sizing: border-box;
+      }
+      .toggle-group input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #ff9800;
+      }
+      .toggle-group span {
+        font-size: 15px;
+        font-weight: bold;
+        user-select: none;
+      }
+
+      pre {
+        background: #15151c;
+        color: #e0e0e0;
+        padding: 25px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: "Courier New", Courier, monospace;
+        line-height: 1.8;
+        overflow-x: auto;
+        white-space: pre;
+        border-left: 5px solid #ff9800;
+      }
+      b {
+        color: #00e676; /* Warna Hijau Terang untuk Chord / Angka */
+        font-weight: bold;
+      }
+      hr {
+        border: 0;
+        height: 1px;
+        background: #3a3a4a;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <label
+        style="
+          display: block;
+          margin-bottom: 8px;
+          font-weight: bold;
+          color: #ff9800;
+        "
+        >Pilih Sesi:</label
+      >
+      <div class="session-tabs">
+        <button class="tab-btn active" onclick="changeSession(1)">
+          SESI 1
+        </button>
+        <button class="tab-btn" onclick="changeSession(2)">SESI 2</button>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="song-select">Pilih Lagu:</label>
+          <select id="song-select">
+            <option value="">-- Memuat Daftar Lagu --</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="key-select">Pilih Nada Dasar:</label>
+          <select id="key-select">
+            <option value="C">C</option>
+            <option value="C#">C# / Db</option>
+            <option value="D">D</option>
+            <option value="D#">D# / Eb</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="F#">F# / Gb</option>
+            <option value="G">G</option>
+            <option value="G#">G# / Ab</option>
+            <option value="A">A</option>
+            <option value="A#">A# / Bb</option>
+            <option value="B">B</option>
+          </select>
+        </div>
+
+        <label class="toggle-group">
+          <input type="checkbox" id="notation-toggle" />
+          <span>Notasi Only</span>
+        </label>
+      </div>
+
+      <hr />
+
+      <h1 id="song-title">Memuat Judul Lagu...</h1>
+      <p id="song-artist">Penyanyi: -</p>
+
+      <h3>Lirik & Chord:</h3>
+      <pre id="chord-display">Memuat lirik dari database...</pre>
+    </div>
+
+    <script>
+      const scaleKeys = {
+        C: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
+        "C#": ["C#", "D#m", "E#m", "F#", "G#", "A#m", "B#dim"],
+        D: ["D", "Em", "F#m", "G", "A", "Bm", "C#dim"],
+        "D#": ["D#", "Fm", "Gm", "G#", "A#", "Cm", "Ddim"],
+        E: ["E", "F#m", "G#m", "A", "B", "C#m", "D#dim"],
+        F: ["F", "Gm", "Am", "Bb", "C", "Dm", "Edim"],
+        "F#": ["F#", "G#m", "A#m", "B", "C#", "D#m", "E#dim"],
+        G: ["G", "Am", "Bm", "C", "D", "Em", "F#dim"],
+        "G#": ["G#", "A#m", "Cm", "C#", "D#", "Fm", "Gdim"],
+        A: ["A", "Bm", "C#m", "D", "E", "F#m", "G#dim"],
+        "A#": ["A#", "Cm", "Dm", "D#", "F", "Gm", "Adim"],
+        B: ["B", "C#m", "D#m", "E", "F#", "G#m", "A#dim"],
+      };
+
+      // ATURAN KLASIFIKASI MANUAL (HARDCODED MAPPING) - Dipaksa String biar matching sama JSON
+      const sessionMapping = {
+        2: ["1", "2", "3", "4", "5"],
+        1: ["6", "7", "8", "9", "10", "11"],
+      };
+
+      let allSongsFromDB = [];
+      let rawContentFromDB = "";
+      let currentSession = 1;
+
+      async function loadAllSongs() {
+        try {
+          const response = await fetch("songs.json");
+          allSongsFromDB = await response.json();
+          filterSongsBySession(currentSession);
+        } catch (err) {
+          console.error("Gagal load file songs.json:", err);
+          document.getElementById("chord-display").innerText =
+            "Gagal memuat file database JSON.";
+        }
+      }
+
+      function filterSongsBySession(sessionNum) {
+        const songSelect = document.getElementById("song-select");
+        songSelect.innerHTML = "";
+
+        const filteredSongs = allSongsFromDB.filter((song) => {
+          // Memastikan kecocokan tipe data string ID
+          return (
+            sessionMapping[sessionNum] &&
+            sessionMapping[sessionNum].includes(String(song.id))
+          );
+        });
+
+        if (filteredSongs.length === 0) {
+          const option = document.createElement("option");
+          option.innerText = "-- Tidak ada lagu di sesi ini --";
+          songSelect.appendChild(option);
+          document.getElementById("song-title").innerText = "Kosong";
+          document.getElementById("song-artist").innerText = "Penyanyi: -";
+          document.getElementById("chord-display").innerText =
+            "Belum ada lagu yang didaftarkan ke sesi ini.";
+          return;
+        }
+
+        filteredSongs.forEach((song) => {
+          const option = document.createElement("option");
+          option.value = song.id;
+          option.innerText = `${song.title} - ${song.artist}`;
+          songSelect.appendChild(option);
+        });
+
+        showSongDetails(filteredSongs[0].id);
+      }
+
+      function changeSession(sessionNum) {
+        currentSession = sessionNum;
+        const buttons = document.querySelectorAll(".tab-btn");
+        buttons[0].classList.toggle("active", sessionNum === 1);
+        buttons[1].classList.toggle("active", sessionNum === 2);
+        filterSongsBySession(currentSession);
+      }
+
+      function showSongDetails(id) {
+        // Dipaksa perbandingan string (toString()) biar anti-gagal di browser mana pun
+        const song = allSongsFromDB.find(
+          (s) => s.id.toString() === id.toString(),
+        );
+
+        if (!song) {
+          console.error("Lagu tidak ditemukan untuk ID:", id);
+          document.getElementById("chord-display").innerText =
+            "Eror: Data lagu gagal diproses.";
+          return;
+        }
+
+        document.getElementById("song-title").innerText = song.title;
+        document.getElementById("song-artist").innerText =
+          "Penyanyi: " + song.artist;
+        rawContentFromDB = song.content;
+
+        document.getElementById("key-select").value = song.original_key;
+        renderChord(song.original_key);
+      }
+
+      function renderChord(chosenKey) {
+        if (!rawContentFromDB) {
+          document.getElementById("chord-display").innerText =
+            "Konten lagu kosong.";
+          return;
+        }
+
+        let processedText = rawContentFromDB;
+        const isNotationOnly =
+          document.getElementById("notation-toggle").checked;
+
+        // A. JIKA TOGGLE "NOTASI ONLY" AKTIF
+        if (isNotationOnly) {
+          processedText = processedText.replace(
+            /\[([\d\w\/#]+)\]/g,
+            function (match, content) {
+              return `<b>[${content}]</b>`;
+            },
+          );
+        }
+        // B. JIKA TOGGLE MATI -> Jalankan konversi ke Chord Huruf
+        else {
+          const noteCircle = [
+            "C",
+            "C#",
+            "D",
+            "D#",
+            "E",
+            "F",
+            "F#",
+            "G",
+            "G#",
+            "A",
+            "A#",
+            "B",
+          ];
+
+          // Regex disempurnakan agar bisa membaca format angka murni maupun slash chord seperti [2/4#]
+          processedText = processedText.replace(
+            /\[([\d\w\/#]+)\]/g,
+            function (match, fullContent) {
+              // Jika bentuknya slash chord seperti 2/4#
+              if (fullContent.includes("/")) {
+                let parts = fullContent.split("/");
+                let transParts = parts.map((part) => {
+                  let numMatch = part.match(/^(\d+)(#?)(.*)$/);
+                  if (!numMatch) return part;
+                  let [_, number, sharp, suffix] = numMatch;
+                  let num = parseInt(number);
+                  let chordAsli = scaleKeys[chosenKey][num - 1];
+                  if (sharp === "#" && chordAsli) {
+                    let baseNote = chordAsli.match(/^[A-G]#?/)[0];
+                    let noteIdx = noteCircle.indexOf(baseNote);
+                    let sharpedNote = noteCircle[(noteIdx + 1) % 12];
+                    return (
+                      sharpedNote +
+                      chordAsli.substring(baseNote.length) +
+                      suffix
+                    );
+                  }
+                  return chordAsli ? chordAsli + suffix : part;
+                });
+                return `<b>[${transParts.join("/")}]</b>`;
+              }
+
+              // Jika bentuknya angka biasa atau ada embel-embel M/m (misal 6M)
+              let numMatch = fullContent.match(/^(\d+)(#?)(.*)$/);
+              if (!numMatch) return match;
+
+              let [_, number, sharp, suffix] = numMatch;
+              let num = parseInt(number);
+              let chordAsli = scaleKeys[chosenKey][num - 1];
+
+              if (sharp === "#" && chordAsli) {
+                let baseNote = chordAsli.match(/^[A-G]#?/)[0];
+                let noteIdx = noteCircle.indexOf(baseNote);
+                let sharpedNote = noteCircle[(noteIdx + 1) % 12];
+                return `<b>[${sharpedNote}${chordAsli.substring(baseNote.length)}${suffix}]</b>`;
+              }
+
+              if (chordAsli) {
+                return `<b>[${chordAsli}${suffix}]</b>`;
+              }
+              return match;
+            },
+          );
+        }
+
+        // C. Highlight Penanda Struktur Lagu jadi Bold Oranye
+        processedText = processedText.replace(
+          /(\b(intro|verse\s*\d*|chorus|bridge|reff|tag|outro|coda|ending|instrumental|interlude|penyembahan)\b:?|\[(intro|verse\s*\d*|chorus|bridge|reff|tag|outro|coda|ending|instrumental|interlude|penyembahan)\])/gi,
+          function (match) {
+            return `<strong style="color: #ff9800; display: inline-block; margin-top: 15px; font-size: 18px;">${match}</strong>`;
+          },
+        );
+
+        document.getElementById("chord-display").innerHTML = processedText;
+      }
+
+      document
+        .getElementById("song-select")
+        .addEventListener("change", function (e) {
+          showSongDetails(e.target.value);
+        });
+      document
+        .getElementById("key-select")
+        .addEventListener("change", function (e) {
+          renderChord(e.target.value);
+        });
+      document
+        .getElementById("notation-toggle")
+        .addEventListener("change", function (e) {
+          renderChord(document.getElementById("key-select").value);
+        });
+
+      loadAllSongs();
+    </script>
+  </body>
+</html>
