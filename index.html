@@ -230,23 +230,23 @@
         const songSelect = document.getElementById("song-select");
         songSelect.innerHTML = "";
       
-        // 1. Ambil list ID dari sessionMapping dan paksa semuanya jadi string bersih tanpa spasi
+        // 1. Ambil list urutan ID yang mau kita tampilin (misal: ["6", "7", "8", "9", "10", "11"])
         const targetOrder = (sessionMapping[sessionNum] || []).map(id => String(id).trim());
       
-        // 2. Filter lagu yang ID-nya terdaftar di sesi ini
-        let filteredSongs = allSongsFromDB.filter((song) => {
-          const cleanSongId = String(song.id).trim();
-          return targetOrder.includes(cleanSongId);
+        // 2. Bikin array kosong buat nampung hasil akhir yang udah pasti terurut
+        let sortedSongs = [];
+      
+        // 3. LOGIKA BARU: Kita looping urutan ID-nya dulu, baru cari lagunya di database.
+        // Cara ini DIJAMIN 100% bakal bikin lagu terurut persis mutlak dari atas ke bawah!
+        targetOrder.forEach((targetId) => {
+          const matchSong = allSongsFromDB.find(song => String(song.id).trim() === targetId);
+          if (matchSong) {
+            sortedSongs.push(matchSong);
+          }
         });
       
-        // 3. Sorting dengan membandingkan posisi indeks string yang sudah bersih
-        filteredSongs.sort((a, b) => {
-          const indexA = targetOrder.indexOf(String(a.id).trim());
-          const indexB = targetOrder.indexOf(String(b.id).trim());
-          return indexA - indexB;
-        });
-      
-        if (filteredSongs.length === 0) {
+        // 4. Jika setelah dicari ternyata zonk / gak ada lagu sama sekali
+        if (sortedSongs.length === 0) {
           const option = document.createElement("option");
           option.innerText = "-- Tidak ada lagu di sesi ini --";
           songSelect.appendChild(option);
@@ -256,15 +256,16 @@
           return;
         }
       
-        filteredSongs.forEach((song) => {
+        // 5. Masukkan lagu yang udah rapi terurut ke dalam dropdown
+        sortedSongs.forEach((song) => {
           const option = document.createElement("option");
           option.value = song.id;
           option.innerText = `${song.title} - ${song.artist}`;
           songSelect.appendChild(option);
         });
       
-        // Jalankan render untuk lagu pertama yang sudah terurut paling atas
-        showSongDetails(filteredSongs[0].id);
+        // 6. Langsung tampilkan detail chord untuk lagu urutan pertama (paling atas)
+        showSongDetails(sortedSongs[0].id);
       }
 
       function changeSession(sessionNum) {
