@@ -32,7 +32,7 @@ Indonesian church music already has a compact notation for this: scale degrees i
 1. **Notation-only toggle** — when on, degrees are kept as numbers and only bolded. Useful for printing a key-agnostic lead sheet.
 2. **Degree resolution** — `/[(\d\w\/#]+)]/` matches every token; `scaleKeys[key][n-1]` maps the degree to its chord in the target key.
 3. **Accidental & compound tokens** — a trailing `#` raises the resolved root one semitone by walking the note circle (`noteCircle[(idx + 1) % 12]`), and any remaining suffix (`M`, `sus`, `add9`) is appended untouched. Slash chords like `[2/4#]` are split on `/` and each half resolves independently.
-4. **Structure highlighting** — section labels (`intro`, `verse`, `chorus`, `bridge`, `reff`, `tag`, `outro`, `coda`, `instrumental`, `interlude`, `penyembahan`) are bolded in accent colour, with or without brackets.
+4. **Structure highlighting** — section labels (`intro`, `verse`, `chorus`, `bridge`, `reff`, `tag`, `outro`, `coda`, `ending`, `instrumental`, `interlude`, `penyembahan`) are bolded in accent colour, with or without brackets.
 
 ```js
 // scaleKeys: degree index → chord name, per key
