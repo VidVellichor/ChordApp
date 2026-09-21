@@ -1,6 +1,6 @@
 # Chord Auto-Convert
 
-> Numeric-notation chord transposer for Indonesian worship songs. Songs are written once in **sistem angka** (degree notation — `1`, `4`, `5`, `6`, `2M`, `2/4#`) and rendered live as real chord names for any chosen key, with session-based song grouping.
+> Numeric-notation chord transposer for Indonesian worship songs. Songs are written once in **sistem angka** (degree notation: `1`, `4`, `5`, `6`, `2M`, `2/4#`) and rendered live as real chord names for any chosen key, with session-based song grouping.
 
 **Live demo:** https://chord-app-sand.vercel.app
 **Stack:** Vanilla JS · Single-file SPA · JSON data store · Vercel
@@ -9,7 +9,7 @@
 
 ## The problem
 
-Worship teams usually keep one arrangement per song in a fixed key. When the singer asks to move it down two semitones, someone rewrites every chord by hand — slowly, and with mistakes.
+Worship teams usually keep one arrangement per song in a fixed key. When the singer asks to move it down two semitones, someone rewrites every chord by hand, slowly and with mistakes.
 
 Indonesian church music already has a compact notation for this: scale degrees instead of chord names. `1-5-6-4` means the same progression in every key. This app stores songs in that form and resolves the degrees to actual chords at render time, so transposition is a dropdown change rather than an edit.
 
@@ -29,10 +29,10 @@ Indonesian church music already has a compact notation for this: scale degrees i
 
 `renderChord()` runs four passes over the raw chart text:
 
-1. **Notation-only toggle** — when on, degrees are kept as numbers and only bolded. Useful for printing a key-agnostic lead sheet.
-2. **Degree resolution** — `/[(\d\w\/#]+)]/` matches every token; `scaleKeys[key][n-1]` maps the degree to its chord in the target key.
-3. **Accidental & compound tokens** — a trailing `#` raises the resolved root one semitone by walking the note circle (`noteCircle[(idx + 1) % 12]`), and any remaining suffix (`M`, `sus`, `add9`) is appended untouched. Slash chords like `[2/4#]` are split on `/` and each half resolves independently.
-4. **Structure highlighting** — section labels (`intro`, `verse`, `chorus`, `bridge`, `reff`, `tag`, `outro`, `coda`, `ending`, `instrumental`, `interlude`, `penyembahan`) are bolded in accent colour, with or without brackets.
+1. **Notation-only toggle**: when on, degrees are kept as numbers and only bolded. Useful for printing a key-agnostic lead sheet.
+2. **Degree resolution**: `/[(\d\w\/#]+)]/` matches every token; `scaleKeys[key][n-1]` maps the degree to its chord in the target key.
+3. **Accidental & compound tokens**: a trailing `#` raises the resolved root one semitone by walking the note circle (`noteCircle[(idx + 1) % 12]`), and any remaining suffix (`M`, `sus`, `add9`) is appended untouched. Slash chords like `[2/4#]` are split on `/` and each half resolves independently.
+4. **Structure highlighting**: section labels (`intro`, `verse`, `chorus`, `bridge`, `reff`, `tag`, `outro`, `coda`, `ending`, `instrumental`, `interlude`, `penyembahan`) are bolded in accent colour, with or without brackets.
 
 ```js
 // scaleKeys: degree index → chord name, per key
@@ -43,7 +43,7 @@ const scaleKeys = {
 };
 ```
 
-Because the whole engine is a single regex pass over a string, transposition is instant and fully client-side — nothing is persisted back to `songs.json`.
+Because the whole engine is a single regex pass over a string, transposition is instant and fully client-side (nothing is persisted back to `songs.json`.
 
 ## Data format
 
@@ -65,7 +65,7 @@ To add a song: append an object to `songs.json`, then add its `id` to the releva
 
 ## Running locally
 
-No install needed — serve the folder statically:
+No install needed. Serve the folder statically:
 
 ```bash
 # any of these work
@@ -80,7 +80,7 @@ Then open http://localhost:8000.
 ```
 ChordApp/
 ├── index.html      # UI + transposition engine (single file)
-├── songs.json      # song catalogue — the data store
+├── songs.json      # song catalogue (the data store)
 └── legacy/
     └── server.js   # early Express + MySQL prototype, not used in the deployed app
 ```
@@ -89,7 +89,7 @@ ChordApp/
 
 ## Notes on content
 
-The bundled song charts are from an internal retreat collection. If you fork this for public use, replace `songs.json` with material you hold the rights to — the app itself is content-agnostic.
+The bundled song charts are from an internal retreat collection. If you fork this for public use, replace `songs.json` with material you hold the rights to; the app itself is content-agnostic.
 
 ## License
 
