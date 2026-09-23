@@ -1,162 +1,408 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Website Chord Auto-Convert</title>
-    <style>
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        max-width: 950px;
-        margin: 40px auto;
-        padding: 20px;
-        background-color: #1e1e24;
-        color: #fff;
-      }
-      .card {
-        background: #2a2a35;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-      }
-      h1 {
-        margin-top: 0;
-        color: #ff9800;
-        font-size: 28px;
-      }
-      p {
-        color: #ccc;
-        margin-bottom: 25px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ChordApp — Auto-Convert & Transpose</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-card: #1f2937;
+      --border: #374151;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --chord: #10b981;
+      --chord-bg: rgba(16, 185, 129, 0.12);
+      --section: #fbbf24;
+      --font-code: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, Menlo, monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
 
-      /* Style untuk Tab Sesi */
-      .session-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 25px;
-      }
-      .tab-btn {
-        flex: 1;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 6px;
-        border: none;
-        background: #3a3a4a;
-        color: #fff;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-      .tab-btn.active {
-        background: #ff9800;
-        color: #1e1e24;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-      .controls {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 25px;
-        align-items: flex-end;
-      }
-      .control-group {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-      }
-      label {
-        font-size: 14px;
-        color: #ff9800;
-        margin-bottom: 5px;
-        font-weight: bold;
-      }
-      select {
-        padding: 10px 15px;
-        font-size: 16px;
-        border-radius: 6px;
-        background: #3a3a4a;
-        color: #fff;
-        border: 1px solid #555;
-        cursor: pointer;
-        width: 100%;
-      }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 90px;
+    }
 
-      /* Style untuk Toggle Notasi Angka Only */
-      .toggle-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #3a3a4a;
-        padding: 10px 15px;
-        border-radius: 6px;
-        border: 1px solid #555;
-        cursor: pointer;
-        height: 42px;
-        box-sizing: border-box;
-      }
-      .toggle-group input {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        accent-color: #ff9800;
-      }
-      .toggle-group span {
-        font-size: 15px;
-        font-weight: bold;
-        user-select: none;
-      }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 16px;
+    }
 
-      pre {
-        background: #15151c;
-        color: #e0e0e0;
-        padding: 25px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-family: "Courier New", Courier, monospace;
-        line-height: 1.8;
-        overflow-x: auto;
-        white-space: pre;
-        border-left: 5px solid #ff9800;
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      color: #000;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .session-selector {
+      display: flex;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .session-btn {
+      flex: 1;
+      min-height: 42px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .session-btn.active {
+      background: var(--surface-card);
+      color: var(--accent);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .control-row {
+        grid-template-columns: 2fr 1fr;
       }
-      b {
-        color: #00e676; /* Warna Hijau Terang untuk Chord / Angka */
-        font-weight: bold;
-      }
-      hr {
-        border: 0;
-        height: 1px;
-        background: #3a3a4a;
-        margin: 20px 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="card">
-      <label
-        style="
-          display: block;
-          margin-bottom: 8px;
-          font-weight: bold;
-          color: #ff9800;
-        "
-        >Pilih Sesi:</label
-      >
-      <div class="session-tabs">
-        <button class="tab-btn active" onclick="changeSession(1)">
-          SESI 1
-        </button>
-        <button class="tab-btn" onclick="changeSession(2)">SESI 2</button>
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .transpose-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-card);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    .btn-action {
+      min-width: 40px;
+      min-height: 38px;
+      padding: 0 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .btn-action:hover:not(:disabled) {
+      background: var(--border);
+    }
+
+    .key-badge {
+      padding: 0 12px;
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--accent);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      min-height: 40px;
+    }
+
+    .toggle-pill input {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+    }
+
+    .font-box {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .song-header {
+      margin-bottom: 12px;
+    }
+
+    .song-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--accent);
+    }
+
+    .song-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .chord-view {
+      background: #060911;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--font-code);
+      font-size: 16px;
+      line-height: 1.8;
+      color: #e2e8f0;
+      position: relative;
+    }
+
+    .chord-view b {
+      display: inline-block;
+      color: var(--chord);
+      background: var(--chord-bg);
+      padding: 1px 5px;
+      margin: 0 1px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .chord-view strong.section-tag {
+      display: block;
+      color: var(--section);
+      font-weight: 800;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 16px 0 6px;
+      padding-bottom: 2px;
+      border-bottom: 1px dashed rgba(245, 158, 11, 0.3);
+      width: fit-content;
+    }
+
+    .chord-view strong.section-tag:first-child {
+      margin-top: 0;
+    }
+
+    /* Floating Autoscroll Bar */
+    .autoscroll-bar {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 28px);
+      max-width: 600px;
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+    }
+
+    .btn-scroll {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+    }
+
+    .scroll-slider {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .scroll-slider input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-icon:hover {
+      color: var(--text);
+      background: var(--surface-card);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon">♪</div>
+        <div>
+          <div class="brand-title">ChordApp</div>
+          <div class="brand-subtitle">Smart Transpose & Numbered Notation Converter</div>
+        </div>
       </div>
+      <button class="btn-action" id="btn-copy" title="Salin chord & lirik">📋 Salin</button>
+    </header>
 
-      <div class="controls">
-        <div class="control-group">
-          <label for="song-select">Pilih Lagu:</label>
+    <div class="session-selector">
+      <button class="session-btn active" data-session="1">SESI 1</button>
+      <button class="session-btn" data-session="2">SESI 2</button>
+    </div>
+
+    <div class="panel">
+      <div class="control-row">
+        <div class="field">
+          <label for="song-select">Pilih Lagu</label>
           <select id="song-select">
-            <option value="">-- Memuat Daftar Lagu --</option>
+            <option value="">Memuat daftar lagu...</option>
           </select>
         </div>
-
-        <div class="control-group">
-          <label for="key-select">Pilih Nada Dasar:</label>
+        <div class="field">
+          <label for="key-select">Nada Dasar</label>
           <select id="key-select">
             <option value="C">C</option>
             <option value="C#">C# / Db</option>
@@ -172,256 +418,303 @@
             <option value="B">B</option>
           </select>
         </div>
-
-        <label class="toggle-group">
-          <input type="checkbox" id="notation-toggle" />
-          <span>Notasi Only</span>
-        </label>
       </div>
 
-      <hr />
+      <div class="quick-actions">
+        <div class="transpose-box">
+          <button class="btn-action" id="btn-down" title="Turun 1/2 nada">-1</button>
+          <div class="key-badge" id="key-badge">G</div>
+          <button class="btn-action" id="btn-up" title="Naik 1/2 nada">+1</button>
+        </div>
 
-      <h1 id="song-title">Memuat Judul Lagu...</h1>
-      <p id="song-artist">Penyanyi: -</p>
+        <label class="toggle-pill">
+          <input type="checkbox" id="notation-toggle" />
+          <span>Notasi Angka</span>
+        </label>
 
-      <h3>Lirik & Chord:</h3>
-      <pre id="chord-display">Memuat lirik dari database...</pre>
+        <div class="font-box">
+          <button class="btn-action" id="btn-font-dec" title="Perkecil huruf">A-</button>
+          <button class="btn-action" id="btn-font-inc" title="Perbesar huruf">A+</button>
+        </div>
+      </div>
     </div>
 
-    <script>
-      const scaleKeys = {
-        C: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
-        "C#": ["C#", "D#m", "E#m", "F#", "G#", "A#m", "B#dim"],
-        D: ["D", "Em", "F#m", "G", "A", "Bm", "C#dim"],
-        "D#": ["D#", "Fm", "Gm", "G#", "A#", "Cm", "Ddim"],
-        E: ["E", "F#m", "G#m", "A", "B", "C#m", "D#dim"],
-        F: ["F", "Gm", "Am", "Bb", "C", "Dm", "Edim"],
-        "F#": ["F#", "G#m", "A#m", "B", "C#", "D#m", "E#dim"],
-        G: ["G", "Am", "Bm", "C", "D", "Em", "F#dim"],
-        "G#": ["G#", "A#m", "Cm", "C#", "D#", "Fm", "Gdim"],
-        A: ["A", "Bm", "C#m", "D", "E", "F#m", "G#dim"],
-        "A#": ["A#", "Cm", "Dm", "D#", "F", "Gm", "Adim"],
-        B: ["B", "C#m", "D#m", "E", "F#", "G#m", "A#dim"],
-      };
+    <div class="song-header">
+      <h1 class="song-title" id="song-title">Memuat...</h1>
+      <div class="song-meta" id="song-meta">Penyanyi: -</div>
+    </div>
 
-      // ATURAN KLASIFIKASI MANUAL (HARDCODED MAPPING) - Dipaksa String biar matching sama JSON
-      const sessionMapping = {
-        1: ["1", "2", "3", "4", "5"],
-        2: ["6", "7", "8", "9", "10", "11"],
-      };
+    <div class="chord-view" id="chord-display">Memuat lirik & chord...</div>
+  </div>
 
-      let allSongsFromDB = [];
-      let rawContentFromDB = "";
-      let currentSession = 1;
+  <div class="autoscroll-bar">
+    <button class="btn-scroll" id="btn-scroll-toggle" title="Play/Pause Auto Scroll">▶</button>
+    <div class="scroll-slider">
+      <span>Auto-Scroll</span>
+      <input type="range" id="scroll-speed" min="1" max="10" value="3" />
+      <span id="speed-label">3x</span>
+    </div>
+    <button class="btn-icon" id="btn-scroll-top" title="Ke atas">↑ Top</button>
+  </div>
 
-      async function loadAllSongs() {
+  <script>
+    const NOTE_CIRCLE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+    const SCALE_KEYS = {
+      "C":  ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
+      "C#": ["C#", "D#m", "E#m", "F#", "G#", "A#m", "B#dim"],
+      "D":  ["D", "Em", "F#m", "G", "A", "Bm", "C#dim"],
+      "D#": ["D#", "Fm", "Gm", "G#", "A#", "Cm", "Ddim"],
+      "E":  ["E", "F#m", "G#m", "A", "B", "C#m", "D#dim"],
+      "F":  ["F", "Gm", "Am", "Bb", "C", "Dm", "Edim"],
+      "F#": ["F#", "G#m", "A#m", "B", "C#", "D#m", "E#dim"],
+      "G":  ["G", "Am", "Bm", "C", "D", "Em", "F#dim"],
+      "G#": ["G#", "A#m", "Cm", "C#", "D#", "Fm", "Gdim"],
+      "A":  ["A", "Bm", "C#m", "D", "E", "F#m", "G#dim"],
+      "A#": ["A#", "Cm", "Dm", "D#", "F", "Gm", "Adim"],
+      "B":  ["B", "C#m", "D#m", "E", "F#", "G#m", "A#dim"]
+    };
+
+    const SESSION_MAPPING = {
+      1: ["1", "2", "3", "4", "5"],
+      2: ["6", "7", "8", "9", "10", "11"]
+    };
+
+    let allSongs = [];
+    let currentSession = 1;
+    let currentRawContent = "";
+    let currentFontSize = 16;
+    let isScrolling = false;
+    let scrollTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    async function init() {
+      setupEventListeners();
+      await fetchSongData();
+    }
+
+    function setupEventListeners() {
+      document.querySelectorAll(".session-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".session-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentSession = parseInt(btn.dataset.session, 10);
+          filterSession(currentSession);
+        });
+      });
+
+      $("song-select").addEventListener("change", (e) => selectSong(e.target.value));
+
+      $("key-select").addEventListener("change", (e) => {
+        $("key-badge").textContent = e.target.value;
+        renderChords();
+      });
+
+      $("notation-toggle").addEventListener("change", renderChords);
+
+      $("btn-down").addEventListener("click", () => stepTranspose(-1));
+      $("btn-up").addEventListener("click", () => stepTranspose(1));
+
+      $("btn-font-inc").addEventListener("click", () => adjustFontSize(1));
+      $("btn-font-dec").addEventListener("click", () => adjustFontSize(-1));
+
+      $("btn-copy").addEventListener("click", copyContent);
+
+      $("btn-scroll-toggle").addEventListener("click", toggleAutoScroll);
+      $("scroll-speed").addEventListener("input", (e) => {
+        $("speed-label").textContent = `${e.target.value}x`;
+      });
+      $("btn-scroll-top").addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+
+    async function fetchSongData() {
+      const candidates = ["./songs.json", "songs.json", "/songs.json"];
+      for (const url of candidates) {
         try {
-          // Menggunakan window.location.origin biar jalurnya mutlak ke root domain Vercel lu
-          const urlDatabase = `${window.location.origin}/songs.json`;
-          console.log("Mencoba mengambil database dari:", urlDatabase);
-          
-          const response = await fetch(urlDatabase);
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          const resp = await fetch(url);
+          if (resp.ok) {
+            allSongs = await resp.json();
+            if (Array.isArray(allSongs) && allSongs.length > 0) {
+              filterSession(currentSession);
+              return;
+            }
           }
-          
-          allSongsFromDB = await response.json();
-          filterSongsBySession(currentSession);
-        } catch (err) {
-          console.error("Gagal load file songs.json:", err);
-          document.getElementById("chord-display").innerText = "Gagal memuat file database JSON.";
-        }
+        } catch (_) {}
       }
 
-      function filterSongsBySession(sessionNum) {
-        const songSelect = document.getElementById("song-select");
-        songSelect.innerHTML = "";
-      
-        // 1. Ambil list urutan ID yang mau kita tampilin (misal: ["6", "7", "8", "9", "10", "11"])
-        const targetOrder = (sessionMapping[sessionNum] || []).map(id => String(id).trim());
-      
-        // 2. Bikin array kosong buat nampung hasil akhir yang udah pasti terurut
-        let sortedSongs = [];
-      
-        // 3. LOGIKA BARU: Kita looping urutan ID-nya dulu, baru cari lagunya di database.
-        // Cara ini DIJAMIN 100% bakal bikin lagu terurut persis mutlak dari atas ke bawah!
-        targetOrder.forEach((targetId) => {
-          const matchSong = allSongsFromDB.find(song => String(song.id).trim() === targetId);
-          if (matchSong) {
-            sortedSongs.push(matchSong);
+      $("chord-display").innerHTML = "Gagal memuat file <code>songs.json</code>. Pastikan file berada di folder yang sama.";
+    }
+
+    function filterSession(sessionNum) {
+      const select = $("song-select");
+      select.innerHTML = "";
+
+      const ids = SESSION_MAPPING[sessionNum] || [];
+      const sessionSongs = ids.map((id) => allSongs.find((s) => String(s.id).trim() === id)).filter(Boolean);
+
+      if (sessionSongs.length === 0) {
+        const opt = document.createElement("option");
+        opt.textContent = "-- Tidak ada lagu di sesi ini --";
+        select.appendChild(opt);
+        $("song-title").textContent = "Kosong";
+        $("song-meta").textContent = "Penyanyi: -";
+        $("chord-display").textContent = "Belum ada daftar lagu untuk sesi ini.";
+        return;
+      }
+
+      sessionSongs.forEach((song) => {
+        const opt = document.createElement("option");
+        opt.value = song.id;
+        opt.textContent = `${song.title} (${song.artist})`;
+        select.appendChild(opt);
+      });
+
+      selectSong(sessionSongs[0].id);
+    }
+
+    function selectSong(songId) {
+      const song = allSongs.find((s) => String(s.id) === String(songId));
+      if (!song) return;
+
+      $("song-title").textContent = song.title;
+      $("song-meta").textContent = `Penyanyi: ${song.artist}  ·  Original Key: ${song.original_key}`;
+      currentRawContent = song.content || "";
+
+      $("key-select").value = song.original_key || "C";
+      $("key-badge").textContent = song.original_key || "C";
+
+      renderChords();
+    }
+
+    function stepTranspose(delta) {
+      const select = $("key-select");
+      const current = select.value;
+      const idx = NOTE_CIRCLE.indexOf(current);
+      if (idx === -1) return;
+      const nextIdx = (idx + delta + 12) % 12;
+      const nextKey = NOTE_CIRCLE[nextIdx];
+      select.value = nextKey;
+      $("key-badge").textContent = nextKey;
+      renderChords();
+    }
+
+    function adjustFontSize(delta) {
+      currentFontSize = Math.max(12, Math.min(28, currentFontSize + delta));
+      $("chord-display").style.fontSize = `${currentFontSize}px`;
+    }
+
+    function renderChords() {
+      if (!currentRawContent) {
+        $("chord-display").textContent = "Konten lagu belum tersedia.";
+        return;
+      }
+
+      const chosenKey = $("key-select").value;
+      const isNotationOnly = $("notation-toggle").checked;
+      let text = currentRawContent;
+
+      if (isNotationOnly) {
+        text = text.replace(/\[([\d\w\/#]+)\]/g, (_, c) => `<b>[${c}]</b>`);
+      } else {
+        text = text.replace(/\[([\d\w\/#]+)\]/g, (match, fullContent) => {
+          if (fullContent.includes("/")) {
+            const parts = fullContent.split("/");
+            const trans = parts.map((part) => convertSingleChord(part, chosenKey));
+            return `<b>[${trans.join("/")}]</b>`;
           }
+          return `<b>[${convertSingleChord(fullContent, chosenKey)}]</b>`;
         });
-      
-        // 4. Jika setelah dicari ternyata zonk / gak ada lagu sama sekali
-        if (sortedSongs.length === 0) {
-          const option = document.createElement("option");
-          option.innerText = "-- Tidak ada lagu di sesi ini --";
-          songSelect.appendChild(option);
-          document.getElementById("song-title").innerText = "Kosong";
-          document.getElementById("song-artist").innerText = "Penyanyi: -";
-          document.getElementById("chord-display").innerText = "Belum ada lagu yang didaftarkan ke sesi ini.";
-          return;
-        }
-      
-        // 5. Masukkan lagu yang udah rapi terurut ke dalam dropdown
-        sortedSongs.forEach((song) => {
-          const option = document.createElement("option");
-          option.value = song.id;
-          option.innerText = `${song.title} - ${song.artist}`;
-          songSelect.appendChild(option);
-        });
-      
-        // 6. Langsung tampilkan detail chord untuk lagu urutan pertama (paling atas)
-        showSongDetails(sortedSongs[0].id);
       }
 
-      function changeSession(sessionNum) {
-        currentSession = sessionNum;
-        const buttons = document.querySelectorAll(".tab-btn");
-        buttons[0].classList.toggle("active", sessionNum === 1);
-        buttons[1].classList.toggle("active", sessionNum === 2);
-        filterSongsBySession(currentSession);
+      text = text.replace(
+        /(\b(intro|verse\s*\d*|chorus|bridge|reff|tag|outro|coda|ending|instrumental|interlude|penyembahan)\b:?|\[(intro|verse\s*\d*|chorus|bridge|reff|tag|outro|coda|ending|instrumental|interlude|penyembahan)\])/gi,
+        (match) => `<strong class="section-tag">${match}</strong>`
+      );
+
+      $("chord-display").innerHTML = text;
+    }
+
+    function convertSingleChord(token, key) {
+      const scale = SCALE_KEYS[key] || SCALE_KEYS["C"];
+      const match = token.match(/^(\d+)(#?)(.*)$/);
+      if (!match) return token;
+
+      const [_, numStr, sharp, suffix] = match;
+      const num = parseInt(numStr, 10);
+      if (num < 1 || num > 7) return token;
+
+      const baseChord = scale[num - 1];
+      if (!baseChord) return token;
+
+      if (sharp === "#") {
+        const rootMatch = baseChord.match(/^[A-G]#?/);
+        if (!rootMatch) return baseChord + suffix;
+        const root = rootMatch[0];
+        const rootIdx = NOTE_CIRCLE.indexOf(root);
+        const sharped = NOTE_CIRCLE[(rootIdx + 1) % 12];
+        return sharped + baseChord.substring(root.length) + suffix;
       }
 
-      function showSongDetails(id) {
-        // Dipaksa perbandingan string (toString()) biar anti-gagal di browser mana pun
-        const song = allSongsFromDB.find(
-          (s) => s.id.toString() === id.toString(),
-        );
+      return baseChord + suffix;
+    }
 
-        if (!song) {
-          console.error("Lagu tidak ditemukan untuk ID:", id);
-          document.getElementById("chord-display").innerText =
-            "Eror: Data lagu gagal diproses.";
-          return;
-        }
+    function toggleAutoScroll() {
+      isScrolling = !isScrolling;
+      const btn = $("btn-scroll-toggle");
 
-        document.getElementById("song-title").innerText = song.title;
-        document.getElementById("song-artist").innerText =
-          "Penyanyi: " + song.artist;
-        rawContentFromDB = song.content;
-
-        document.getElementById("key-select").value = song.original_key;
-        renderChord(song.original_key);
+      if (isScrolling) {
+        btn.textContent = "⏸";
+        btn.style.background = "#ef4444";
+        btn.style.color = "#fff";
+        startScrollLoop();
+      } else {
+        btn.textContent = "▶";
+        btn.style.background = "var(--accent)";
+        btn.style.color = "#000";
+        stopScrollLoop();
       }
+    }
 
-      function renderChord(chosenKey) {
-        if (!rawContentFromDB) {
-          document.getElementById("chord-display").innerText =
-            "Konten lagu kosong.";
-          return;
+    function startScrollLoop() {
+      stopScrollLoop();
+      scrollTimer = setInterval(() => {
+        const speed = parseInt($("scroll-speed").value, 10);
+        window.scrollBy({ top: speed * 0.8, behavior: "auto" });
+
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 5) {
+          toggleAutoScroll();
         }
+      }, 50);
+    }
 
-        let processedText = rawContentFromDB;
-        const isNotationOnly =
-          document.getElementById("notation-toggle").checked;
-
-        // A. JIKA TOGGLE "NOTASI ONLY" AKTIF
-        if (isNotationOnly) {
-          processedText = processedText.replace(
-            /\[([\d\w\/#]+)\]/g,
-            function (match, content) {
-              return `<b>[${content}]</b>`;
-            },
-          );
-        }
-        // B. JIKA TOGGLE MATI -> Jalankan konversi ke Chord Huruf
-        else {
-          const noteCircle = [
-            "C",
-            "C#",
-            "D",
-            "D#",
-            "E",
-            "F",
-            "F#",
-            "G",
-            "G#",
-            "A",
-            "A#",
-            "B",
-          ];
-
-          // Regex disempurnakan agar bisa membaca format angka murni maupun slash chord seperti [2/4#]
-          processedText = processedText.replace(
-            /\[([\d\w\/#]+)\]/g,
-            function (match, fullContent) {
-              // Jika bentuknya slash chord seperti 2/4#
-              if (fullContent.includes("/")) {
-                let parts = fullContent.split("/");
-                let transParts = parts.map((part) => {
-                  let numMatch = part.match(/^(\d+)(#?)(.*)$/);
-                  if (!numMatch) return part;
-                  let [_, number, sharp, suffix] = numMatch;
-                  let num = parseInt(number);
-                  let chordAsli = scaleKeys[chosenKey][num - 1];
-                  if (sharp === "#" && chordAsli) {
-                    let baseNote = chordAsli.match(/^[A-G]#?/)[0];
-                    let noteIdx = noteCircle.indexOf(baseNote);
-                    let sharpedNote = noteCircle[(noteIdx + 1) % 12];
-                    return (
-                      sharpedNote +
-                      chordAsli.substring(baseNote.length) +
-                      suffix
-                    );
-                  }
-                  return chordAsli ? chordAsli + suffix : part;
-                });
-                return `<b>[${transParts.join("/")}]</b>`;
-              }
-
-              // Jika bentuknya angka biasa atau ada embel-embel M/m (misal 6M)
-              let numMatch = fullContent.match(/^(\d+)(#?)(.*)$/);
-              if (!numMatch) return match;
-
-              let [_, number, sharp, suffix] = numMatch;
-              let num = parseInt(number);
-              let chordAsli = scaleKeys[chosenKey][num - 1];
-
-              if (sharp === "#" && chordAsli) {
-                let baseNote = chordAsli.match(/^[A-G]#?/)[0];
-                let noteIdx = noteCircle.indexOf(baseNote);
-                let sharpedNote = noteCircle[(noteIdx + 1) % 12];
-                return `<b>[${sharpedNote}${chordAsli.substring(baseNote.length)}${suffix}]</b>`;
-              }
-
-              if (chordAsli) {
-                return `<b>[${chordAsli}${suffix}]</b>`;
-              }
-              return match;
-            },
-          );
-        }
-
-        // C. Highlight Penanda Struktur Lagu jadi Bold Oranye
-        processedText = processedText.replace(
-          /(\b(intro|verse\s*\d*|chorus|bridge|reff|tag|outro|coda|ending|instrumental|interlude|penyembahan)\b:?|\[(intro|verse\s*\d*|chorus|bridge|reff|tag|outro|coda|ending|instrumental|interlude|penyembahan)\])/gi,
-          function (match) {
-            return `<strong style="color: #ff9800; display: inline-block; margin-top: 15px; font-size: 18px;">${match}</strong>`;
-          },
-        );
-
-        document.getElementById("chord-display").innerHTML = processedText;
+    function stopScrollLoop() {
+      if (scrollTimer) {
+        clearInterval(scrollTimer);
+        scrollTimer = null;
       }
+    }
 
-      document
-        .getElementById("song-select")
-        .addEventListener("change", function (e) {
-          showSongDetails(e.target.value);
-        });
-      document
-        .getElementById("key-select")
-        .addEventListener("change", function (e) {
-          renderChord(e.target.value);
-        });
-      document
-        .getElementById("notation-toggle")
-        .addEventListener("change", function (e) {
-          renderChord(document.getElementById("key-select").value);
-        });
+    async function copyContent() {
+      const title = $("song-title").textContent;
+      const meta = $("song-meta").textContent;
+      const key = $("key-select").value;
+      const display = $("chord-display");
+      const text = `${title}\n${meta} | Transpose: ${key}\n\n${display.innerText}`;
 
-      loadAllSongs();
-    </script>
-  </body>
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = $("btn-copy");
+        btn.textContent = "✓ Disalin!";
+        setTimeout(() => (btn.textContent = "📋 Salin"), 1500);
+      } catch (_) {
+        alert("Gagal menyalin teks.");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
 </html>
