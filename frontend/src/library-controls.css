@@ -1,0 +1,15 @@
+.mz-library-fieldset{border:0;padding:0;margin:0 0 20px;min-width:0}
+.mz-library-controls,.mz-library-controls form,.mz-track-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mz-library-controls{justify-content:space-between}
+.mz-library-controls label{display:flex;align-items:center;gap:10px;font-size:12px}
+.mz-library-controls input,.mz-library-controls select,.mz-library-controls button,.mz-track-actions button,.mz-track-actions summary{background:#20241e;color:#e4e9dc;border:1px solid #424b38;border-radius:6px;padding:9px 12px;font:inherit;font-size:12px}
+.mz-library-controls input{min-width:0;max-width:100%}
+.mz-track-actions{grid-column:2/-1;padding:0 0 12px;align-items:flex-start}
+.mz-track-actions button[aria-pressed=true]{background:#334426;color:#d6ef83}
+.mz-track-actions .mz-delete{color:#ffb1a9}
+.mz-track-actions summary{cursor:pointer}
+.mz-memberships{display:grid;gap:10px;padding:12px;max-width:260px;background:#171a15;border:1px solid #424b38;border-radius:6px;margin-top:6px}
+.mz-memberships label{display:flex;align-items:center;gap:8px;overflow-wrap:anywhere;font-size:12px}
+.mz-memberships p{font-size:12px;margin:0}
+.mz-library-controls :focus-visible,.mz-track-actions :focus-visible{outline:2px solid #d6ef83;outline-offset:3px}
+@media(max-width:600px){.mz-library-controls{align-items:stretch}.mz-library-controls form{width:100%}.mz-library-controls input{flex:1;width:120px}.mz-track-actions{gap:8px}.mz-track-actions button,.mz-track-actions summary{padding:10px}}

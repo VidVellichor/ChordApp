@@ -5,3 +5,15 @@ node_modules/
 Thumbs.db
 *.log
 .vercel
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+frontend/dist/
+workspace/
+models/
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.zip
